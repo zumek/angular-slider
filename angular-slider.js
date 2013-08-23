@@ -81,7 +81,7 @@
     }
   };
 
-  sliderDirective = function($timeout) {
+  sliderDirective = function($timeout, $document) {
     return {
       restrict: 'EA',
       scope: {
@@ -135,7 +135,7 @@
             var barWidth, boundToInputs, dimensions, maxOffset, maxValue, minOffset, minValue, ngDocument, offsetRange, pointerHalfWidth, updateDOM, valueRange, w, _j, _len1;
 
             boundToInputs = false;
-            ngDocument = angularize(document);
+            ngDocument = $document[0];
             if (!attributes.translate) {
               scope.translate = function(value) {
                 return value.value;
@@ -251,11 +251,7 @@
               bindToInputEvents = function(pointer, ref, events) {
                 var onEnd, onMove, onStart;
 
-                onEnd = function() {
-                  pointer.removeClass('active');
-                  ngDocument.unbind(events.move);
-                  return ngDocument.unbind(events.end);
-                };
+
                 onMove = function(event) {
                   var eventX, newOffset, newPercent, newValue;
 
@@ -283,13 +279,18 @@
                   scope[ref] = newValue;
                   return scope.$apply();
                 };
+                onEnd = function() {
+                  pointer.removeClass('active');
+                  ngDocument.removeEventListener(events.move, onMove);
+                  return ngDocument.removeEventListener(events.end, onEnd);
+                };
                 onStart = function(event) {
                   pointer.addClass('active');
                   dimensions();
                   event.stopPropagation();
                   event.preventDefault();
-                  ngDocument.bind(events.move, onMove);
-                  return ngDocument.bind(events.end, onEnd);
+                  ngDocument.addEventListener(events.move, onMove);
+                  return ngDocument.addEventListener(events.end, onEnd);
                 };
                 return pointer.bind(events.start, onStart);
               };
@@ -327,7 +328,7 @@
     };
   };
 
-  qualifiedDirectiveDefinition = ['$timeout', sliderDirective];
+  qualifiedDirectiveDefinition = ['$timeout', '$document', sliderDirective];
 
   module = function(window, angular) {
     return angular.module(MODULE_NAME, []).directive(SLIDER_TAG, qualifiedDirectiveDefinition);
