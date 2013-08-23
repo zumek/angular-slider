@@ -70,14 +70,14 @@
 
   inputEvents = {
     mouse: {
-      start: 'mousedown',
-      move: 'mousemove',
-      end: 'mouseup'
+      start: 'mousedown.uislider',
+      move: 'mousemove.uislider',
+      end: 'mouseup.uislider'
     },
     touch: {
-      start: 'touchstart',
-      move: 'touchmove',
-      end: 'touchend'
+      start: 'touchsta.uislider',
+      move: 'touchmove.uislider',
+      end: 'touchend.uislider'
     }
   };
 
@@ -135,7 +135,7 @@
             var barWidth, boundToInputs, dimensions, maxOffset, maxValue, minOffset, minValue, ngDocument, offsetRange, pointerHalfWidth, updateDOM, valueRange, w, _j, _len1;
 
             boundToInputs = false;
-            ngDocument = $document[0];
+            ngDocument = $document;
             if (!attributes.translate) {
               scope.translate = function(value) {
                 return value.value;
@@ -255,7 +255,9 @@
                 onMove = function(event) {
                   var eventX, newOffset, newPercent, newValue;
 
-                  eventX = event.clientX || event.touches[0].clientX;
+                  eventX = event.clientX || 
+                    (event.touches && event.touches[0].clientX) ||
+                    (event.originalEvent && event.originalEvent.changedTouches[0].clientX);
                   newOffset = eventX - element[0].getBoundingClientRect().left - pointerHalfWidth;
                   newOffset = Math.max(Math.min(newOffset, maxOffset), minOffset);
                   newPercent = percentOffset(newOffset);
@@ -281,18 +283,18 @@
                 };
                 onEnd = function() {
                   pointer.removeClass('active');
-                  ngDocument.removeEventListener(events.move, onMove);
-                  return ngDocument.removeEventListener(events.end, onEnd);
+                  ngDocument.off(events.move);
+                  return ngDocument.off(events.end);
                 };
                 onStart = function(event) {
                   pointer.addClass('active');
                   dimensions();
                   event.stopPropagation();
                   event.preventDefault();
-                  ngDocument.addEventListener(events.move, onMove);
-                  return ngDocument.addEventListener(events.end, onEnd);
+                  ngDocument.on(events.move, onMove);
+                  return ngDocument.on(events.end, onEnd);
                 };
-                return pointer.bind(events.start, onStart);
+                return pointer.on(events.start, onStart);
               };
               setBindings = function() {
                 var bind, inputMethod, _j, _len1, _ref2, _results;
